@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Claude Auth Helper Demo</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial; margin: 32px; }
+    textarea { width: 100%; height: 120px; }
+  </style>
+</head>
+<body>
+  <h1>Claude Auth Helper — Demo</h1>
+  <p>
+    <a id="connect" href="/auth/start">Connect provider (OAuth)</a>
+    <button id="logout">Logout</button>
+  </p>
+
+  <h2>Ask Claude</h2>
+  <textarea id="prompt" placeholder="Enter a prompt for Claude...">Summarize the benefits of using a backend proxy for OAuth + Claude integration.</textarea>
+  <p><button id="ask">Send to Claude</button></p>
+  <pre id="output"></pre>
+
+  <script>
+    document.getElementById("ask").onclick = async () => {
+      const prompt = document.getElementById("prompt").value;
+      const res = await fetch("/api/claude", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt })
+      });
+      const json = await res.json();
+      document.getElementById("output").textContent = JSON.stringify(json, null, 2);
+    };
+    document.getElementById("logout").onclick = async () => {
+      await fetch("/auth/logout", { method: "POST" });
+      location.reload();
+    };
+  </script>
+</body>
+</html>

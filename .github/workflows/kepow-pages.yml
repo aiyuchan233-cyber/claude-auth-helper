@@ -1,0 +1,41 @@
+name: Deploy KEPOW Christmas Horizon Rush
+on:
+  push:
+    branches:
+      - kepow-christmas-horizon-v2
+    paths:
+      - 'kepow-game/site_bundle.zip.b64'
+      - '.github/workflows/kepow-pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: kepow-pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build static site from the verified bundle
+        run: |
+          mkdir -p public
+          base64 --decode kepow-game/site_bundle.zip.b64 > /tmp/kepow-site.zip
+          unzip -q /tmp/kepow-site.zip -d public
+          test -s public/index.html
+          test -s public/game.js
+          test -s public/style.css
+          touch public/.nojekyll
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
